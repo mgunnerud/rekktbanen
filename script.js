@@ -1,8 +1,9 @@
 const stopToyen = 3010600;
 const stopSinsen = 0;
 const stopGjettum = 2190360;
-const eastDirection = '2';
-const westDirection = '1';
+const stopJernbaneTorget = 3010011;
+const eastDirection = '1';
+const westDirection = '2';
 var loadDeparturesFn = null;
 
 function callAjax(url, callback){
@@ -21,11 +22,15 @@ function toDoubleDigit(n){
 }
 
 function getDepartureTimesFromToyen() {
-	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopToyen + '?linenames=3', westDirection);
+	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopToyen + '?linenames=3', eastDirection);
 };
 
 function getDepartureTimesFromGjettum() {
-	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopGjettum + '?linenames=3', westDirection);
+	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopGjettum + '?linenames=3', eastDirection);
+};
+
+function getDepartureTimesFromJernbaneTorget() {
+	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopJernbaneTorget + '?linenames=3', westDirection);
 };
 
 function getDeparturesFromStop(url, direction) {
@@ -34,7 +39,7 @@ function getDeparturesFromStop(url, direction) {
 		var topData = [];
 		for (var i = 0; i < jsonReturn.length; i++) {
 			if (jsonReturn[i].MonitoredVehicleJourney.DirectionRef === direction) {
-				var timeDiff = (new Date(jsonReturn[i].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime) - new Date()) / 1000;
+				var timeDiff = (new Date(jsonReturn[i].MonitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime) - new Date()) / 1000;
 				var readableTime = Math.floor(timeDiff / 60) + '.' + toDoubleDigit(Math.floor(timeDiff % 60));
 				topData.push(readableTime);
 			}
@@ -81,6 +86,11 @@ window.onload = function(e){
 		loadDeparturesFn = getDepartureTimesFromToyen;
 		setSelectedStop(this);
 	});
+		
+	document.getElementById('jernbaneTorget').addEventListener('click', function() {
+		loadDeparturesFn = getDepartureTimesFromJernbaneTorget;
+		setSelectedStop(this);
+	});
 	
 	document.getElementById('refresh-button').addEventListener('click', function() {
 		if (loadDeparturesFn) {
@@ -88,7 +98,5 @@ window.onload = function(e){
 		}
 	});
 }
- 
-//getDepartureTimesFromToyen(); 
 
-// callAjax('http://reisapi.ruter.no/Line/GetStopsByLineId/3', function() {})
+//callAjax('http://reisapi.ruter.no/Line/GetStopsByLineId/3', function() {})
