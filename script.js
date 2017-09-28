@@ -1,6 +1,6 @@
 const stopToyen = 3010600;
 const stopSinsen = 0;
-const stopGjettum = 2190360;
+const stopAvlos = 2190280;
 const stopJernbaneTorget = 3010011;
 const eastDirection = '1';
 const westDirection = '2';
@@ -26,7 +26,7 @@ function getDepartureTimesFromToyen() {
 };
 
 function getDepartureTimesFromGjettum() {
-	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopGjettum + '?linenames=3', eastDirection);
+	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopAvlos + '?linenames=3', eastDirection);
 };
 
 function getDepartureTimesFromJernbaneTorget() {
