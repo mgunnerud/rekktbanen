@@ -1,10 +1,11 @@
 const stopToyen = 3010600;
-const stopSinsen = 0;
 const stopAvlos = 2190280;
+const stopKolsas = 2190450;
+const stopMajorstua = 3010200;
+const stopGronland = 3010610;
 const stopJernbaneTorget = 3010011;
 const eastDirection = '1';
 const westDirection = '2';
-var loadDeparturesFn = null;
 
 function callAjax(url, callback){
     var xmlhttp = new XMLHttpRequest();
@@ -20,18 +21,6 @@ function callAjax(url, callback){
 function toDoubleDigit(n){
     return n > 9 ? "" + n: "0" + n;
 }
-
-function getDepartureTimesFromToyen() {
-	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopToyen + '?linenames=3', eastDirection);
-};
-
-function getDepartureTimesFromGjettum() {
-	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopAvlos + '?linenames=3', eastDirection);
-};
-
-function getDepartureTimesFromJernbaneTorget() {
-	getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopJernbaneTorget + '?linenames=3', westDirection);
-};
 
 function getDeparturesFromStop(url, direction) {
 	var callback = function(returnData) {
@@ -73,30 +62,48 @@ function loadDepartureTimes() {
 	document.getElementById('refresh-button').style.display = 'none';
 	document.getElementById('departure-rows').innerHTML = ""; // clear old data;
 	document.getElementById('departure-loader').style.display = 'inline-block';
-	loadDeparturesFn();
 }
 
 window.onload = function(e){ 
-    document.getElementById('gjettum').addEventListener('click', function() {
-	    loadDeparturesFn = getDepartureTimesFromGjettum;
+    document.getElementById('avlos-jernbaneTorget').addEventListener('click', function() {
+	    getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopAvlos + '?linenames=3', eastDirection);
     	setSelectedStop(this);
 	});
 	
-	document.getElementById('toyen').addEventListener('click', function() {
-		loadDeparturesFn = getDepartureTimesFromToyen;
+	document.getElementById('toyen-bogerud').addEventListener('click', function() {
+		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopToyen + '?linenames=3', eastDirection);
 		setSelectedStop(this);
 	});
 		
-	document.getElementById('jernbaneTorget').addEventListener('click', function() {
-		loadDeparturesFn = getDepartureTimesFromJernbaneTorget;
+	document.getElementById('jernbaneTorget-avlos').addEventListener('click', function() {
+		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopJernbaneTorget + '?linenames=3', westDirection);
+		setSelectedStop(this);
+	});
+	
+	document.getElementById('kolsas-majorstua').addEventListener('click', function() {
+		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopKolsas + '?linenames=3', eastDirection);
+		setSelectedStop(this);
+	});
+	
+	document.getElementById('majorstua-kolsas').addEventListener('click', function() {
+		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopMajorstua + '?linenames=3', westDirection);
+		setSelectedStop(this);
+	});
+	
+	document.getElementById('gronland-kolsas').addEventListener('click', function() {
+		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopGronland + '?linenames=3', westDirection);
 		setSelectedStop(this);
 	});
 	
 	document.getElementById('refresh-button').addEventListener('click', function() {
-		if (loadDeparturesFn) {
-			loadDepartureTimes();
-		}
+		document.getElementsByClassName("fa-check")[0].click()
 	});
+	
+	if (window.location.hash.indexOf("select=hm") > -1) {
+		document.getElementById("s-select").style.display = "none";
+	} else {
+		document.getElementById("hm-select").style.display = "none";
+	}
 }
 
 //callAjax('http://reisapi.ruter.no/Line/GetStopsByLineId/3', function() {})
