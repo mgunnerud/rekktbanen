@@ -4,6 +4,7 @@ const stopKolsas = 2190450;
 const stopMajorstua = 3010200;
 const stopGronland = 3010610;
 const stopJernbaneTorget = 3010011;
+const stopNational = 3010031;
 const eastDirection = '1';
 const westDirection = '2';
 
@@ -90,6 +91,11 @@ window.onload = function(e){
 		setSelectedStop(this);
 	});
 	
+	document.getElementById('national-kolsas').addEventListener('click', function() {
+		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopNational + '?linenames=3', westDirection);
+		setSelectedStop(this);
+	});
+	
 	document.getElementById('gronland-kolsas').addEventListener('click', function() {
 		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopGronland + '?linenames=3', westDirection);
 		setSelectedStop(this);
@@ -105,5 +111,5 @@ window.onload = function(e){
 		document.getElementById("hm-select").style.display = "none";
 	}
 }
-
+// test to get stop ids 
 //callAjax('http://reisapi.ruter.no/Line/GetStopsByLineId/3', function() {})
