@@ -7,6 +7,7 @@ const stopJernbaneTorget = 3010011;
 const stopNational = 3010031;
 const eastDirection = '1';
 const westDirection = '2';
+const urlRoot = 'https://reisapi.ruter.no/StopVisit/GetDepartures/';
 
 function callAjax(url, callback){
     var xmlhttp = new XMLHttpRequest();
@@ -67,37 +68,37 @@ function loadDepartureTimes() {
 
 window.onload = function(e){ 
     document.getElementById('avlos-jernbaneTorget').addEventListener('click', function() {
-	    getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopAvlos + '?linenames=3', eastDirection);
+	    getDeparturesFromStop(urlRoot + stopAvlos + '?linenames=3', eastDirection);
     	setSelectedStop(this);
 	});
 	
 	document.getElementById('toyen-bogerud').addEventListener('click', function() {
-		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopToyen + '?linenames=3', eastDirection);
+		getDeparturesFromStop(urlRoot + stopToyen + '?linenames=3', eastDirection);
 		setSelectedStop(this);
 	});
 		
 	document.getElementById('jernbaneTorget-avlos').addEventListener('click', function() {
-		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopJernbaneTorget + '?linenames=3', westDirection);
+		getDeparturesFromStop(urlRoot + stopJernbaneTorget + '?linenames=3', westDirection);
 		setSelectedStop(this);
 	});
 	
 	document.getElementById('kolsas-majorstua').addEventListener('click', function() {
-		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopKolsas + '?linenames=3', eastDirection);
+		getDeparturesFromStop(urlRoot + stopKolsas + '?linenames=3', eastDirection);
 		setSelectedStop(this);
 	});
 	
 	document.getElementById('majorstua-kolsas').addEventListener('click', function() {
-		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopMajorstua + '?linenames=3', westDirection);
+		getDeparturesFromStop(urlRoot + stopMajorstua + '?linenames=3', westDirection);
 		setSelectedStop(this);
 	});
 	
 	document.getElementById('national-kolsas').addEventListener('click', function() {
-		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopNational + '?linenames=3', westDirection);
+		getDeparturesFromStop(urlRoot + stopNational + '?linenames=3', westDirection);
 		setSelectedStop(this);
 	});
 	
 	document.getElementById('gronland-kolsas').addEventListener('click', function() {
-		getDeparturesFromStop('http://reisapi.ruter.no/StopVisit/GetDepartures/' + stopGronland + '?linenames=3', westDirection);
+		getDeparturesFromStop(urlRoot + stopGronland + '?linenames=3', westDirection);
 		setSelectedStop(this);
 	});
 	
@@ -112,4 +113,4 @@ window.onload = function(e){
 	}
 }
 // test to get stop ids 
-//callAjax('http://reisapi.ruter.no/Line/GetStopsByLineId/3', function() {})
+//callAjax('https://reisapi.ruter.no/Line/GetStopsByLineId/3', function() {})
