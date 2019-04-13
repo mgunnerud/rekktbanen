@@ -1,58 +1,88 @@
-const stopToyen = 3010600;
-const stopAvlos = 2190280;
-const stopKolsas = 2190450;
-const stopMajorstua = 3010200;
-const stopGronland = 3010610;
-const stopJernbaneTorget = 3010011;
-const stopNational = 3010031;
-const eastDirection = '1';
-const westDirection = '2';
-const urlRoot = 'https://reisapi.ruter.no/StopVisit/GetDepartures/';
+const config = [
+	{ fromName: "Kolsås", fromId: "NSR:StopPlace:4060", toName: "Jernbanetorget", toId: "NSR:StopPlace:3990", lines: ["RUT:Line:3"] },
+	{ fromName: "Grønland", fromId: "NSR:StopPlace:6488", toName: "Kolsås", toId: "NSR:StopPlace:4060", lines: ["RUT:Line:3"] },
+	{ fromName: "Kalbakken", fromId: "NSR:StopPlace:5810", toName: "Tøyen", toId: "NSR:StopPlace:6473", lines: ["RUT:Line:5"] }
+];
 
-function callAjax(url, callback){
+var callAjax = function(postContent, callback) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function(){
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200){
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             callback(xmlhttp.responseText);
         }
     }
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send();
-};
+    
+    xmlhttp.open("POST", "https://api.entur.org/journeyplanner/2.0/index/graphql", true);
+    xmlhttp.setRequestHeader('Access-Control-Allow-Origin', '*');
+    xmlhttp.setRequestHeader('ET-Client-Name', 'RekkTbanen');
+    xmlhttp.setRequestHeader('Content-type', 'application/json');
+    xmlhttp.send(JSON.stringify(postContent));
+}
 
 function toDoubleDigit(n){
     return n > 9 ? "" + n: "0" + n;
 }
 
-function getDeparturesFromStop(url, direction) {
+function getDeparturesFromStop(fromStop, toStop, lines) {
 	var callback = function(returnData) {
-		var jsonReturn = JSON.parse(returnData);
+		var jsonReturn = JSON.parse(returnData).data.trip.tripPatterns;
 		var topData = [];
-		for (var i = 0; i < jsonReturn.length; i++) {
-			if (jsonReturn[i].MonitoredVehicleJourney.DirectionRef === direction) {
-				var timeDiff = (new Date(jsonReturn[i].MonitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime) - new Date()) / 1000;
+		var rowsEl = document.getElementById('departure-rows');
+		if (jsonReturn[0].legs.length === 0 || !jsonReturn[0].legs[0].fromEstimatedCall) {
+			var noDeparturesFoundEl = document.createElement('div');
+			noDeparturesFoundEl.innerHTML = "Fant ingen avganger";
+			rowsEl.appendChild(noDeparturesFoundEl);
+		} else {
+			for (var i = 0; i < jsonReturn.length; i++) {
+				var timeDiff = (new Date(jsonReturn[i].legs[0].fromEstimatedCall.expectedDepartureTime) - new Date()) / 1000;
 				var readableTime = Math.floor(timeDiff / 60) + '.' + toDoubleDigit(Math.floor(timeDiff % 60));
 				topData.push(readableTime);
 			}
-		}
 		
-		var rowsEl = document.getElementById('departure-rows');
-		for (var j = 0; j < topData.length; j++) {
-			var directionEl = document.createElement('div');
-			directionEl.classList.add('departure-entry');
-			directionEl.innerHTML = topData[j];
-			rowsEl.appendChild(directionEl);
-			
+			for (var j = 0; j < topData.length; j++) {
+				var tripEl = document.createElement('div');
+				tripEl.classList.add('departure-entry');
+				tripEl.innerHTML = topData[j];
+				rowsEl.appendChild(tripEl);
+			}
 		}
-		//console.log(topData);
 		document.getElementById('departure-loader').style.display = 'none';
 		document.getElementById('refresh-button').style.display = 'inline-block';
 	}
-	callAjax(url, callback);
+	var query = `{
+  		trip(
+    		from: {
+				place: "${fromStop}"
+		    }, 
+		    to: {
+		    	place: "${toStop}"
+		    }, 
+    		numTripPatterns: 5,
+		    whiteListed: { lines: ["${lines.join("\",\"")}"] }
+  		) {
+    		tripPatterns {
+		    	legs {
+			        fromEstimatedCall {
+				    	realtime
+				        aimedDepartureTime
+				        expectedDepartureTime
+				        actualDepartureTime
+			        }
+			    }
+		    }
+		}
+	}`;
+
+	var postContent = {
+		query: query,
+		variables: null,
+		operationName: null
+	}
+	callAjax(postContent, callback);
 };
 
 function setSelectedStop(element) {
-	loadDepartureTimes();
+	showLoadingSpinner();
     var selectedStop = document.getElementsByClassName('fa-check')[0];
     if (selectedStop) {
     	selectedStop.classList.remove("fa-check"); // remove class icon
@@ -60,57 +90,36 @@ function setSelectedStop(element) {
 	element.querySelector('.selection-icon').classList.add('fa-check');
 };
 
-function loadDepartureTimes() {
+function showLoadingSpinner() {
 	document.getElementById('refresh-button').style.display = 'none';
 	document.getElementById('departure-rows').innerHTML = ""; // clear old data;
 	document.getElementById('departure-loader').style.display = 'inline-block';
 }
 
-window.onload = function(e){ 
-    document.getElementById('avlos-jernbaneTorget').addEventListener('click', function() {
-	    getDeparturesFromStop(urlRoot + stopAvlos + '?linenames=3', eastDirection);
-    	setSelectedStop(this);
-	});
-	
-	document.getElementById('toyen-bogerud').addEventListener('click', function() {
-		getDeparturesFromStop(urlRoot + stopToyen + '?linenames=3', eastDirection);
-		setSelectedStop(this);
-	});
-		
-	document.getElementById('jernbaneTorget-avlos').addEventListener('click', function() {
-		getDeparturesFromStop(urlRoot + stopJernbaneTorget + '?linenames=3', westDirection);
-		setSelectedStop(this);
-	});
-	
-	document.getElementById('kolsas-majorstua').addEventListener('click', function() {
-		getDeparturesFromStop(urlRoot + stopKolsas + '?linenames=3', eastDirection);
-		setSelectedStop(this);
-	});
-	
-	document.getElementById('majorstua-kolsas').addEventListener('click', function() {
-		getDeparturesFromStop(urlRoot + stopMajorstua + '?linenames=3', westDirection);
-		setSelectedStop(this);
-	});
-	
-	document.getElementById('national-kolsas').addEventListener('click', function() {
-		getDeparturesFromStop(urlRoot + stopNational + '?linenames=3', westDirection);
-		setSelectedStop(this);
-	});
-	
-	document.getElementById('gronland-kolsas').addEventListener('click', function() {
-		getDeparturesFromStop(urlRoot + stopGronland + '?linenames=3', westDirection);
-		setSelectedStop(this);
-	});
-	
-	document.getElementById('refresh-button').addEventListener('click', function() {
-		document.getElementsByClassName("fa-check")[0].click()
-	});
-	
-	if (window.location.hash.indexOf("select=hm") > -1) {
-		document.getElementById("s-select").style.display = "none";
-	} else {
-		document.getElementById("hm-select").style.display = "none";
+window.onload = function(e) {
+	let root = document.getElementById("stop-selector");
+	for (let i = 0; i < config.length; i++) {
+		let stopEl = document.createElement("div");
+		stopEl.classList.add("stop-selector-item");
+		let selectionEl = document.createElement("i");
+		selectionEl.className = "fa selection-icon";
+		let fromEl = document.createElement("span");
+		fromEl.innerHTML = config[i].fromName;
+		let arrowEl = document.createElement("i");
+		arrowEl.className = "fa fa-arrow-right";
+		let toEl = document.createElement("span");
+		toEl.innerHTML = config[i].toName;
+		stopEl.appendChild(selectionEl);
+		stopEl.appendChild(fromEl);
+		stopEl.appendChild(arrowEl);
+		stopEl.appendChild(toEl);
+		stopEl.addEventListener('click', (event) => {
+			getDeparturesFromStop(config[i].fromId, config[i].toId, config[i].lines);
+			setSelectedStop(event.currentTarget);
+		});
+		root.appendChild(stopEl)
 	}
+	document.getElementById('refresh-button').addEventListener('click', function() {
+		document.getElementsByClassName("fa-check")[0].click();
+	});
 }
-// test to get stop ids 
-//callAjax('https://reisapi.ruter.no/Line/GetStopsByLineId/3', function() {})

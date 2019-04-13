@@ -33,6 +33,10 @@ body {
 	width: 25px;
 }
 
+.fa-arrow-right {
+	padding: 0 10px;
+}
+
 .refresh-button-wrapper {
 	text-align: right;
 	margin: 5px;
