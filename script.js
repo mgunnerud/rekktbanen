@@ -4,10 +4,10 @@ const config = [
 	{ fromName: "Kalbakken", fromId: "NSR:StopPlace:5810", toName: "Tøyen", toId: "NSR:StopPlace:6473", lines: ["RUT:Line:5"] }
 ];
 
-var callAjax = function(postContent, callback) {
+const callAjax = (postContent, callback) => {
     var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function(){
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+    xmlhttp.onreadystatechange = () => {
+        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
             callback(xmlhttp.responseText);
         }
     }
@@ -19,14 +19,13 @@ var callAjax = function(postContent, callback) {
     xmlhttp.send(JSON.stringify(postContent));
 }
 
-function toDoubleDigit(n){
+const toDoubleDigit = (n) => {
     return n > 9 ? "" + n: "0" + n;
 }
 
-function getDeparturesFromStop(fromStop, toStop, lines) {
-	var callback = function(returnData) {
+const getDeparturesFromStop = (fromStop, toStop, lines) => {
+	const callback = (returnData) => {
 		var jsonReturn = JSON.parse(returnData).data.trip.tripPatterns;
-		var topData = [];
 		var rowsEl = document.getElementById('departure-rows');
 		if (jsonReturn[0].legs.length === 0 || !jsonReturn[0].legs[0].fromEstimatedCall) {
 			var noDeparturesFoundEl = document.createElement('div');
@@ -36,13 +35,9 @@ function getDeparturesFromStop(fromStop, toStop, lines) {
 			for (var i = 0; i < jsonReturn.length; i++) {
 				var timeDiff = (new Date(jsonReturn[i].legs[0].fromEstimatedCall.expectedDepartureTime) - new Date()) / 1000;
 				var readableTime = Math.floor(timeDiff / 60) + '.' + toDoubleDigit(Math.floor(timeDiff % 60));
-				topData.push(readableTime);
-			}
-		
-			for (var j = 0; j < topData.length; j++) {
 				var tripEl = document.createElement('div');
 				tripEl.classList.add('departure-entry');
-				tripEl.innerHTML = topData[j];
+				tripEl.innerHTML = readableTime;
 				rowsEl.appendChild(tripEl);
 			}
 		}
@@ -53,7 +48,7 @@ function getDeparturesFromStop(fromStop, toStop, lines) {
   		trip(
     		from: {
 				place: "${fromStop}"
-		    }, 
+		    },
 		    to: {
 		    	place: "${toStop}"
 		    }, 
@@ -81,7 +76,7 @@ function getDeparturesFromStop(fromStop, toStop, lines) {
 	callAjax(postContent, callback);
 };
 
-function setSelectedStop(element) {
+const setSelectedStop = (element) => {
 	showLoadingSpinner();
     var selectedStop = document.getElementsByClassName('fa-check')[0];
     if (selectedStop) {
@@ -90,13 +85,13 @@ function setSelectedStop(element) {
 	element.querySelector('.selection-icon').classList.add('fa-check');
 };
 
-function showLoadingSpinner() {
+const showLoadingSpinner = () => {
 	document.getElementById('refresh-button').style.display = 'none';
 	document.getElementById('departure-rows').innerHTML = ""; // clear old data;
 	document.getElementById('departure-loader').style.display = 'inline-block';
 }
 
-window.onload = function(e) {
+const createConfigElements = () => {
 	let root = document.getElementById("stop-selector");
 	for (let i = 0; i < config.length; i++) {
 		let stopEl = document.createElement("div");
@@ -119,7 +114,11 @@ window.onload = function(e) {
 		});
 		root.appendChild(stopEl)
 	}
-	document.getElementById('refresh-button').addEventListener('click', function() {
+} 
+
+window.onload = () => {
+	createConfigElements();
+	document.getElementById('refresh-button').addEventListener('click', () => {
 		document.getElementsByClassName("fa-check")[0].click();
 	});
 }
