@@ -1,36 +1,41 @@
 const config = [
-	{ fromName: "Kolsås", fromId: "NSR:StopPlace:4060", toName: "Jernbanetorget", toId: "NSR:StopPlace:3990", lines: ["RUT:Line:3"] },
-	{ fromName: "Grønland", fromId: "NSR:StopPlace:6488", toName: "Kolsås", toId: "NSR:StopPlace:4060", lines: ["RUT:Line:3"] },
-	{ fromName: "Kalbakken", fromId: "NSR:StopPlace:5810", toName: "Tøyen", toId: "NSR:StopPlace:6473", lines: ["RUT:Line:5"] }
+	{ fromName: 'Kolsås', fromId: 'NSR:StopPlace:4060', toName: 'Jernbanetorget', toId: 'NSR:StopPlace:3990', lines: ['RUT:Line:3'] },
+	{ fromName: 'Grønland', fromId: 'NSR:StopPlace:6488', toName: 'Kolsås', toId: 'NSR:StopPlace:4060', lines: ['RUT:Line:3'] },
+	{ fromName: 'Kalbakken', fromId: 'NSR:StopPlace:5810', toName: 'Tøyen', toId: 'NSR:StopPlace:6473', lines: ['RUT:Line:5'] }
 ];
 
 const callAjax = (postContent, callback) => {
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = () => {
-        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-            callback(xmlhttp.responseText);
-        }
-    }
-    
-    xmlhttp.open("POST", "https://api.entur.org/journeyplanner/2.0/index/graphql", true);
-    xmlhttp.setRequestHeader('Access-Control-Allow-Origin', '*');
-    xmlhttp.setRequestHeader('ET-Client-Name', 'RekkTbanen');
-    xmlhttp.setRequestHeader('Content-type', 'application/json');
-    xmlhttp.send(JSON.stringify(postContent));
+	fetch('https://api.entur.org/journeyplanner/2.0/index/graphql', {
+		method: 'POST',
+		headers: {
+			'Access-Control-Allow-Origin': '*',
+			'ET-Client-Name': 'RekkTbanen',
+			'Content-type': 'application/json'
+		},
+		body: JSON.stringify(postContent)
+	})
+	.then(response => response.json().then(jsonData => callback(jsonData)))
+	.catch(error => showErrorMessage("Feil ved kall til entur API"));
+}
+
+const showErrorMessage = (message) => {
+	document.getElementById('departure-loader').style.display = 'none';
+	var rowsEl = document.getElementById('departure-rows');
+	var noDeparturesFoundEl = document.createElement('div');
+	noDeparturesFoundEl.innerHTML = message;
+	rowsEl.appendChild(noDeparturesFoundEl);
 }
 
 const toDoubleDigit = (n) => {
-    return n > 9 ? "" + n: "0" + n;
+    return n > 9 ? '' + n: '0' + n;
 }
 
 const getDeparturesFromStop = (fromStop, toStop, lines) => {
 	const callback = (returnData) => {
-		var jsonReturn = JSON.parse(returnData).data.trip.tripPatterns;
+		var jsonReturn = returnData.data.trip.tripPatterns;
 		var rowsEl = document.getElementById('departure-rows');
 		if (jsonReturn[0].legs.length === 0 || !jsonReturn[0].legs[0].fromEstimatedCall) {
-			var noDeparturesFoundEl = document.createElement('div');
-			noDeparturesFoundEl.innerHTML = "Fant ingen avganger";
-			rowsEl.appendChild(noDeparturesFoundEl);
+			showErrorMessage('Fant ingen avganger');
 		} else {
 			for (var i = 0; i < jsonReturn.length; i++) {
 				var timeDiff = (new Date(jsonReturn[i].legs[0].fromEstimatedCall.expectedDepartureTime) - new Date()) / 1000;
@@ -87,22 +92,22 @@ const setSelectedStop = (element) => {
 
 const showLoadingSpinner = () => {
 	document.getElementById('refresh-button').style.display = 'none';
-	document.getElementById('departure-rows').innerHTML = ""; // clear old data;
+	document.getElementById('departure-rows').innerHTML = ''; // clear old data;
 	document.getElementById('departure-loader').style.display = 'inline-block';
 }
 
 const createConfigElements = () => {
-	let root = document.getElementById("stop-selector");
+	let root = document.getElementById('stop-selector');
 	for (let i = 0; i < config.length; i++) {
-		let stopEl = document.createElement("div");
-		stopEl.classList.add("stop-selector-item");
-		let selectionEl = document.createElement("i");
-		selectionEl.className = "fa selection-icon";
-		let fromEl = document.createElement("span");
+		let stopEl = document.createElement('div');
+		stopEl.classList.add('stop-selector-item');
+		let selectionEl = document.createElement('i');
+		selectionEl.className = 'fa selection-icon';
+		let fromEl = document.createElement('span');
 		fromEl.innerHTML = config[i].fromName;
-		let arrowEl = document.createElement("i");
-		arrowEl.className = "fa fa-arrow-right";
-		let toEl = document.createElement("span");
+		let arrowEl = document.createElement('i');
+		arrowEl.className = 'fa fa-arrow-right';
+		let toEl = document.createElement('span');
 		toEl.innerHTML = config[i].toName;
 		stopEl.appendChild(selectionEl);
 		stopEl.appendChild(fromEl);
@@ -119,6 +124,6 @@ const createConfigElements = () => {
 window.onload = () => {
 	createConfigElements();
 	document.getElementById('refresh-button').addEventListener('click', () => {
-		document.getElementsByClassName("fa-check")[0].click();
+		document.getElementsByClassName('fa-check')[0].click();
 	});
 }
