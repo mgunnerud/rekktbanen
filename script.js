@@ -5,12 +5,12 @@ const config = [
 ];
 
 const callAjax = (postContent, callback) => {
-	fetch('https://api.entur.org/journeyplanner/2.0/index/graphql', {
+	fetch('https://api.entur.io/journey-planner/v2/graphql', {
 		method: 'POST',
+		mode: 'cors',
 		headers: {
-			'Access-Control-Allow-Origin': '*',
 			'ET-Client-Name': 'RekkTbanen',
-			'Content-type': 'application/json'
+			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify(postContent)
 	})
