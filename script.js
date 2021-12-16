@@ -1,7 +1,15 @@
+const GRORUD = 'NSR:StopPlace:5848'
+const KOLSAS = 'NSR:StopPlace:4060'
+const BRYNSENG = 'NSR:StopPlace:6086'
+const TOYEN = 'NSR:StopPlace:6473'
+const GRONLAND = 'NSR:StopPlace:6488'
+
 const config = [
-	{ fromName: 'Kolsås', fromId: 'NSR:StopPlace:4060', toName: 'Jernbanetorget', toId: 'NSR:StopPlace:3990', lines: ['RUT:Line:3'] },
-	{ fromName: 'Grønland', fromId: 'NSR:StopPlace:6488', toName: 'Kolsås', toId: 'NSR:StopPlace:4060', lines: ['RUT:Line:3'] },
-	{ fromName: 'Kalbakken', fromId: 'NSR:StopPlace:5810', toName: 'Tøyen', toId: 'NSR:StopPlace:6473', lines: ['RUT:Line:5'] }
+	{ fromName: 'Kolsås', fromId: KOLSAS, toName: 'Tøyen', toId: TOYEN, lines: ['RUT:Line:3'] },
+	{ fromName: 'Grønland', fromId: GRONLAND, toName: 'Kolsås', toId: KOLSAS, lines: ['RUT:Line:3'] },
+	{ fromName: 'Tøyen', fromId: TOYEN, toName: 'Grorud', toId: GRORUD, lines: ['RUT:Line:5'] },
+	{ fromName: 'Tøyen', fromId: TOYEN, toName: 'Brynseng', toId: BRYNSENG, lines: ['RUT:Line:2', 'RUT:Line:3', 'RUT:Line:4'] },
+	{ fromName: 'Grorud', fromId: GRORUD, toName: 'Tøyen', toId: TOYEN, lines: ['RUT:Line:5'] }
 ];
 
 const callAjax = (postContent, callback) => {
